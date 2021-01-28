@@ -1,10 +1,10 @@
 var http = require('http');
 var url = require('url');
 var qs = require('querystring');
-var template = require('./lib/template.js');
-var db = require('./lib/db');
-var topic = require('./lib/topic');
-var hsmn = require('./lib/hsmn');
+var template = require('./최강배달프로젝트/lib/template.js');
+var db = require('./최강배달프로젝트/lib/db');
+var topic = require('./최강배달프로젝트/lib/topic');
+var hsmn = require('./최강배달프로젝트/lib/hsmn');
 const { SSL_OP_TLS_BLOCK_PADDING_BUG } = require('constants');
 
 var app = http.createServer(function(request,response){
