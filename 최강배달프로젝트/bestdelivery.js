@@ -41,6 +41,8 @@ var app = http.createServer(function(request,response){
       hsmn.myhs(request,response);
     }else if(pathname === '/myhs_process'){
       hsmn.myhs_process(request,response);
+    }else if(pathname === '/myhs_process2'){
+      hsmn.myhs_process2(request,response);
     }else if(pathname === '/makermaker'){
       hsmn.makermaker(request,response);
     }else if(pathname === '/makermaker_process'){
@@ -77,7 +79,9 @@ var app = http.createServer(function(request,response){
       topic.ridermanager_delete(request,response);
     }else if(pathname === '/autologinprocess'){
       topic.autologinprocess(request,response);
-    }                      
+    }else if(pathname === '/note'){
+      topic.note(request,response);
+    }                         
                           
     
     

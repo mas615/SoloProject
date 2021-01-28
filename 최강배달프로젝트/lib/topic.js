@@ -161,8 +161,8 @@ exports.userpage = function(request,response){
           `<tr>
             <th> ${hospital[i].hs_name} </th> 
             <th> ${hospital[i].hs_phone} </th>
-            <th> ${hospital[i].note} </th>
-            <th> ${hospital[i].hs_address} </th>
+            <th>${hospital[i].note}</th>
+            <th>${hospital[i].hs_address}</th>
             <th> ${clear(hospital,i)} </th>
           </tr>`
           i = i + 1;
@@ -182,7 +182,7 @@ exports.userpage = function(request,response){
           <th> ${user[0].phone} </th>
        </table>`+chart+`<script>
        function autorefresh(){  
-             setTimeout('location.reload()',5000); 
+             setTimeout('location.reload()',120000); 
        }
        autorefresh();
        </script>`,
@@ -728,6 +728,23 @@ exports.autologinprocess = function(request,response){
           response.writeHead(200);
           response.end(html);
 })}
+exports.note = function(require,response){
+  db.query(`select * from hospital`,function(error,site){
+    if(error){
+      throw error;
+    }
+    console.log(site[0].note);
+  var k = `<form name="login" action="/userlogin" method="post">
+              <p>
+                <textarea cols="50" rows="3" 
+                          placeholder="${site[0].note}">${site[0].note}</textarea>
+              </p>
+          </form>`;
+  var html = template.HTMLforHS('로그인', k,``,`/ridermanager`);
+          response.writeHead(200);
+          response.end(html);
+})
+}
 
   
 /*

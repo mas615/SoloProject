@@ -21,7 +21,7 @@ exports.hsmaker = function (request,response) {
 
     var body = `<form action="/hsmaker_process" method="post">
     <p>
-      <input type="text" name="hs_name" placeholder="병원이름">
+      <input type="text" name="hs_name" placeholder="병원이름" autofocus>
     </p>
     <p>
       <input type="text" name="hs_address" placeholder="병원주소">
@@ -96,26 +96,60 @@ exports.hsconnectuser = function (request,response) {
     
 }
 exports.myhs = function (request,response) {
+  db.query('SELECT * from hospital',function(error,site){
+    if(error){
+        throw error;
+    }
     var body = `<form action="/myhs_process" method="post">
     <p>
       <input type="text" name="hs_name" placeholder="병원코드">
     </p>
     
-    <h7>보낼 물건 있나요?</h7><br>
-      <label><input type="radio" name="todayon" value="1" checked>있어요</label>
-      <label><input type="radio" name="todayon" value="0">없어요</label>
-
-    <p>
+    
        <input type="submit">
     </p>
-    
     </form>`;
   var html = template.HTMLforHS('최강배달','<h1>최강배달병원매니저</h1>',body,'/myhs');
     response.writeHead(200);
     response.end(html);
-    
+  })    
 }
 exports.myhs_process = function (request,response) {
+  var body = '';
+    request.on('data', function(data){
+        body = body + data;
+    });
+    request.on('end', function(){
+var post = qs.parse(body);
+console.log(post);
+db.query(`select * from hospital WHERE hs_id =?;`,
+        [post.hs_name],function(error,result){
+          if(error){
+            throw error;
+          }
+          console.log(result[0].hs_name);
+          console.log(post);
+          var body = `<p><h1>${result[0].hs_name}</h1></P>
+          <form action="/myhs_process2" method="post">
+          
+          
+          <h7>보낼 물건 있나요?</h7><br>
+          <input type="hidden" name="hs_name" value="${post.hs_name}">
+            <label><input type="radio" name="todayon" value="1" checked>있어요</label>
+            <label><input type="radio" name="todayon" value="0">없어요</label>
+            <p><textarea name="note"  rows="3" placeholder="${result[0].note}">${result[0].note}</textarea></p>
+          <p>
+             <input type="submit">
+          </p>
+          </form>`
+          var html = template.HTMLforHS('최강배달','<h9>최강배달병원매니저</h9>',body,'/myhs');
+          response.writeHead(200);
+          response.end(html);
+        })
+  
+});
+}
+exports.myhs_process2 = function (request,response) {
     var body = '';
       request.on('data', function(data){
           body = body + data;
@@ -123,6 +157,11 @@ exports.myhs_process = function (request,response) {
       request.on('end', function(){
   var post = qs.parse(body);
   console.log(post);
+  db.query(`UPDATE hospital SET note = ? WHERE hs_id =?;`,
+            [post.note,post.hs_name],function(error,result){
+              if(error){
+                throw error;
+              }})
   db.query(`UPDATE hospital SET todayon = ?,lasttodayon = now() WHERE hs_id =?;`,
           [post.todayon,post.hs_name],function(error,result){
             if(error){
@@ -139,7 +178,7 @@ exports.myhs_process = function (request,response) {
 exports.makermaker = function (request,response) {
     var body = `<form action="/makermaker_process" method="post">
     <p>
-      <input type="text" name="makername" placeholder="기공소이름">
+      <input type="text" name="makername" placeholder="기공소이름" autofocus>
     </p>
     <p>
       <input type="text" name="makeraddress" placeholder="기공소주소">
