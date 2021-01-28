@@ -734,7 +734,13 @@ exports.autologinprocess = function(request,response){
       body = body + data;
   });
   request.on('end', function(){
+   
    var post = qs.parse(body);//data 수신
+   db.query(`insert into log (logname,logdiscription,logdatetime) values(?,?,now())
+   `,[post.id+'배달기사 받음',post.hsid],function(error,result){
+               if(error){
+                 throw error;
+               }})
     db.query(`UPDATE bestdb.hospital SET todayon=0,finishtime = now() WHERE hs_id = ?;`,
     [post.hsid],function(error,result){
       if(error){
@@ -759,7 +765,13 @@ exports.autologinprocess2 = function(request,response){
       body = body + data;
   });
   request.on('end', function(){
+    
    var post = qs.parse(body);//data 수신
+   db.query(`insert into log (logname,logdiscription,logdatetime) values(?,?,now())
+  `,[post.id+'배달기사 줌',post.hsid],function(error,result){
+              if(error){
+                throw error;
+              }})
     db.query(`UPDATE bestdb.hospital SET makertodayon=0,finishtime = now() WHERE hs_id = ?;`,
     [post.hsid],function(error,result){
       if(error){
