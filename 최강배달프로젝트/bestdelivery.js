@@ -79,6 +79,8 @@ var app = http.createServer(function(request,response){
       topic.ridermanager_delete(request,response);
     }else if(pathname === '/autologinprocess'){
       topic.autologinprocess(request,response);
+    }else if(pathname === '/autologinprocess2'){
+      topic.autologinprocess2(request,response);
     }else if(pathname === '/note'){
       topic.note(request,response);
     }                         

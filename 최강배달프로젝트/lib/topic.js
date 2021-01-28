@@ -127,14 +127,15 @@ exports.userpage = function(request,response){
         <th> 전화번호 </th>
         <th> 비고 </th>
         <th> 병원주소 </th>
-        <th> 해결여부 </th>
+        <th> 받음 </th>
+        <th> 줌 </th>
       </tr><br>`;
         
         var i = 0;
         while(i < hospital.length){
           var clear = function (hospital,i) {
             
-            if(hospital[i].hs_clear === 0){
+            if(hospital[i].todayon === 1){
               return `
              
               <p><form action="/autologinprocess" method="post">
@@ -142,7 +143,7 @@ exports.userpage = function(request,response){
                 <input type="hidden" id=2 name='id' value=${userid}>
                 <input type="hidden" id=3 name='pw' value=${userpw}>
                 
-                <input type="submit" value="미해결!">
+                <input type="submit" value="받음!">
               </form></p>`
               //<input type="hidden" id=4 name='clearprocess' value="0">
               
@@ -150,12 +151,29 @@ exports.userpage = function(request,response){
               ;
             }else{
               return `
-              <p style="color:red">${hospital[i].finishtime.getHours()}:${hospital[i].finishtime.getMinutes()}:${hospital[i].finishtime.getSeconds()}</p>`;
+              <p style="color:red">없음!</p>`;
             }
           }
-          var note = function (hospital,i) {
-
+          var clear2 = function (hospital,i) {
             
+            if(hospital[i].makertodayon === 1){
+              return `
+             
+              <p><form action="/autologinprocess2" method="post">
+                <input type="hidden" id=1 name='hsid' value=${hospital[i].hs_id}>
+                <input type="hidden" id=2 name='id' value=${userid}>
+                <input type="hidden" id=3 name='pw' value=${userpw}>
+                
+                <input type="submit" value="줌!">
+              </form></p>`
+              //<input type="hidden" id=4 name='clearprocess' value="0">
+              
+
+              ;
+            }else{
+              return `
+              <p style="color:red">없음!</p>`;
+            }
           }
           list = list + 
           `<tr>
@@ -164,6 +182,7 @@ exports.userpage = function(request,response){
             <th>${hospital[i].note}</th>
             <th>${hospital[i].hs_address}</th>
             <th> ${clear(hospital,i)} </th>
+            <th> ${clear2(hospital,i)} </th>
           </tr>`
           i = i + 1;
         }
@@ -340,6 +359,7 @@ exports.makerpage = function(request,response){
          console.log(hospital);
          var i = 0;
          var list = `<form action="/makerpage_process" method="post">
+                        <input type="hidden" name="makername" value="${post.makername}">
                         <p>${hospital[0].makername}</p>
                         <table border = "1" style = "width : 300; height : 250">
                         <tr><th>병원이름</th><th>마지막으로 신청해주신 날짜</th></tr>`;
@@ -377,6 +397,11 @@ exports.makerpage_process = function (request,response) {
     console.log(post);
     console.log(post.maker[0]);
   while(i < post.maker.length){
+    db.query(`insert into log (logname,logdiscription,logdatetime) values(?,?,now())
+  `,[post.makername,post.maker[i]],function(error,result){
+              if(error){
+                throw error;
+              }})
     db.query(`UPDATE hospital set makerlast=now(),makertodayon=1 where hs_id=${post.maker[i]}`,function label (error,hospital){
       if(error){
         throw error;
@@ -505,7 +530,7 @@ exports.report_all = function(request,response){
                     <th> 기공소</th> 
                     
                     <th> 배달기사코드 </th>
-                    <th> 해결여부 </th>
+                    
                     <th> 해결시각 </th>
                     <th> 병원요청 </th> 
                     <th> 병원요청시각 </th>
@@ -535,7 +560,7 @@ exports.report_all = function(request,response){
             <th> ${hospital[i].makername} </th> 
             
             <th> ${hospital[i].hs_user} </th>
-            <th> ${hospital[i].hs_clear} </th>
+            
             <th> ${hospital[i].finishtime.getMonth()+1}월${hospital[i].finishtime.getDate()}일${hospital[i].finishtime.getHours()}:${hospital[i].finishtime.getMinutes()}:${hospital[i].finishtime.getSeconds()} </th>
             <th> ${hospital[i].todayon} </th> 
             <th> ${hospital[i].lasttodayon.getMonth()+1}월${hospital[i].lasttodayon.getDate()}일${hospital[i].lasttodayon.getHours()}:${hospital[i].lasttodayon.getMinutes()}:${hospital[i].lasttodayon.getSeconds()} </th>
@@ -710,7 +735,32 @@ exports.autologinprocess = function(request,response){
   });
   request.on('end', function(){
    var post = qs.parse(body);//data 수신
-    db.query(`UPDATE bestdb.hospital SET hs_clear=1,finishtime = now() WHERE hs_id = ?;`,
+    db.query(`UPDATE bestdb.hospital SET todayon=0,finishtime = now() WHERE hs_id = ?;`,
+    [post.hsid],function(error,result){
+      if(error){
+        throw error;
+      }});
+   
+ var k = ` <form name="login" action="/userlogin" method="post">
+        <input type="hidden" name="id" value="${post.id}">
+        <input type="hidden" name="pw" value="${post.pw}">  
+          </form>
+
+          <script type="text/javascript">
+          document.login.submit();
+          </script>`;
+  var html = template.HTMLforHS('로그인', k,``,`/ridermanager`);
+          response.writeHead(200);
+          response.end(html);
+})}
+exports.autologinprocess2 = function(request,response){
+  var body = '';
+  request.on('data', function(data){
+      body = body + data;
+  });
+  request.on('end', function(){
+   var post = qs.parse(body);//data 수신
+    db.query(`UPDATE bestdb.hospital SET makertodayon=0,finishtime = now() WHERE hs_id = ?;`,
     [post.hsid],function(error,result){
       if(error){
         throw error;

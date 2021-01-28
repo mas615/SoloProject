@@ -157,6 +157,11 @@ exports.myhs_process2 = function (request,response) {
       request.on('end', function(){
   var post = qs.parse(body);
   console.log(post);
+  db.query(`insert into log (logname,logdiscription,logdatetime) values(?,?,now())
+  `,['병원'+post.hs_name,post.note],function(error,result){
+              if(error){
+                throw error;
+              }})
   db.query(`UPDATE hospital SET note = ? WHERE hs_id =?;`,
             [post.note,post.hs_name],function(error,result){
               if(error){
